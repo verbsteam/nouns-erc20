@@ -53,10 +53,10 @@ contract NounsTest is Test {
         IERC721(NOUNS_TOKEN).approve(address(nouns), 1060);
         nouns.mint(nounIds, NOUNDERS);
 
-        nouns.redeem(nounIds, NOUNDERS);
+        nouns.redeem(nounIds, address(0x123));
         assertEq(nouns.balanceOf(NOUNDERS), 0);
-        assertEq(IERC721(NOUNS_TOKEN).ownerOf(1050), NOUNDERS);
-        assertEq(IERC721(NOUNS_TOKEN).ownerOf(1060), NOUNDERS);
+        assertEq(IERC721(NOUNS_TOKEN).ownerOf(1050), address(0x123));
+        assertEq(IERC721(NOUNS_TOKEN).ownerOf(1060), address(0x123));
     }
 
     function test_upgrade() public {

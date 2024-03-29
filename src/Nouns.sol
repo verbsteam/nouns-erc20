@@ -46,6 +46,6 @@ contract Nouns is ERC20PermitUpgradeable, UUPSUpgradeable {
         for (uint256 i; i < nounIds.length; ++i) {
             nounsToken.transferFrom(address(this), to, nounIds[i]);
         }
-        _burn(to, MULTIPLIER * nounIds.length);
+        _burn(msg.sender, MULTIPLIER * nounIds.length);
     }
 }
