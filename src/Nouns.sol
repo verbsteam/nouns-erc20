@@ -13,7 +13,7 @@ contract Nouns is ERC20PermitUpgradeable, UUPSUpgradeable {
 
     address public owner;
 
-    constructor(address nounsToken_) {
+    constructor(address nounsToken_) initializer {
         nounsToken = IERC721(nounsToken_);
     }
 
