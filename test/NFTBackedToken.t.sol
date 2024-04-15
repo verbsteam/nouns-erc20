@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import {Test} from "forge-std/Test.sol";
-import {NFTBackedToken} from "../src/NFTBackedToken.sol";
-import {TokenDeployer} from "../src/TokenDeployer.sol";
-import {IERC721} from "../src/libs/IERC721.sol";
-import {LibClone} from "../src/libs/LibClone.sol";
-import {ERC20VotesUpgradeable} from
+import { Test } from "forge-std/Test.sol";
+import { NFTBackedToken } from "../src/NFTBackedToken.sol";
+import { TokenDeployer } from "../src/TokenDeployer.sol";
+import { IERC721 } from "../src/libs/IERC721.sol";
+import { LibClone } from "../src/libs/LibClone.sol";
+import { ERC20VotesUpgradeable } from
     "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20VotesUpgradeable.sol";
-import {ERC20PermitUpgradeable} from
+import { ERC20PermitUpgradeable } from
     "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
-import {ERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
-import {NoncesUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
+import { ERC20Upgradeable } from
+    "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import { NoncesUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
 
 contract NFTBackedTokenTest is Test {
     address constant NOUNS_TOKEN = 0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03;
@@ -44,12 +45,12 @@ contract NFTBackedTokenTest is Test {
         assertEq(token.symbol(), "NOUNS");
     }
 
-    function test_mint() public {
+    function test_deposit() public {
         nounIds = [1060, 1050];
         vm.startPrank(NOUNDERS);
         IERC721(NOUNS_TOKEN).approve(address(token), 1050);
         IERC721(NOUNS_TOKEN).approve(address(token), 1060);
-        token.mint(nounIds, NOUNDERS);
+        token.deposit(nounIds, NOUNDERS);
 
         assertEq(token.balanceOf(NOUNDERS), 2_000_000 * 1e18);
         assertEq(IERC721(NOUNS_TOKEN).ownerOf(1050), address(token));
@@ -61,7 +62,7 @@ contract NFTBackedTokenTest is Test {
         vm.startPrank(NOUNDERS);
         IERC721(NOUNS_TOKEN).approve(address(token), 1050);
         IERC721(NOUNS_TOKEN).approve(address(token), 1060);
-        token.mint(nounIds, NOUNDERS);
+        token.deposit(nounIds, NOUNDERS);
 
         token.redeem(nounIds, address(0x123));
         assertEq(token.balanceOf(NOUNDERS), 0);
@@ -74,7 +75,7 @@ contract NFTBackedTokenTest is Test {
         vm.startPrank(NOUNDERS);
         IERC721(NOUNS_TOKEN).approve(address(token), 1050);
         IERC721(NOUNS_TOKEN).approve(address(token), 1060);
-        token.mint(nounIds, NOUNDERS);
+        token.deposit(nounIds, NOUNDERS);
         vm.stopPrank();
 
         address newImpl = address(new NewContract());
@@ -101,7 +102,13 @@ contract NewContract is NFTBackedToken, ERC20VotesUpgradeable {
         return super.nonces(owner);
     }
 
-    function decimals() public view virtual override(ERC20Upgradeable, NFTBackedToken) returns (uint8) {
+    function decimals()
+        public
+        view
+        virtual
+        override(ERC20Upgradeable, NFTBackedToken)
+        returns (uint8)
+    {
         return super.decimals();
     }
 

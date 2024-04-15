@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import {NFTBackedToken} from "./NFTBackedToken.sol";
-import {LibClone} from "./libs/LibClone.sol";
+import { NFTBackedToken } from "./NFTBackedToken.sol";
+import { LibClone } from "./libs/LibClone.sol";
 
 contract TokenDeployer {
     address public immutable tokenImpl;

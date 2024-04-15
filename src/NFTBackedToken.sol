@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import {ERC20PermitUpgradeable} from
+import { ERC20PermitUpgradeable } from
     "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {IERC721} from "./libs/IERC721.sol";
-import {UUPSUpgradeable} from "./libs/UUPSUpgradeable.sol";
+import { OwnableUpgradeable } from
+    "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { IERC721 } from "./libs/IERC721.sol";
+import { UUPSUpgradeable } from "./libs/UUPSUpgradeable.sol";
 
 contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgradeable {
     IERC721 public nft;
@@ -28,24 +29,24 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
         __ERC20Permit_init(name_);
     }
 
-    function _authorizeUpgrade(address) internal override onlyOwner {}
-
     /// @dev Returns the decimals places of the token.
     function decimals() public view virtual override returns (uint8) {
         return decimals_;
     }
 
-    function mint(uint256[] calldata nounIds, address to) public {
-        for (uint256 i; i < nounIds.length; ++i) {
-            nft.transferFrom(msg.sender, address(this), nounIds[i]);
+    function deposit(uint256[] calldata tokenIds, address to) public {
+        for (uint256 i; i < tokenIds.length; ++i) {
+            nft.transferFrom(msg.sender, address(this), tokenIds[i]);
         }
-        _mint(to, unitsPerNFT * (10 ** decimals_) * nounIds.length);
+        _mint(to, unitsPerNFT * (10 ** decimals_) * tokenIds.length);
     }
 
-    function redeem(uint256[] calldata nounIds, address to) public {
-        for (uint256 i; i < nounIds.length; ++i) {
-            nft.transferFrom(address(this), to, nounIds[i]);
+    function redeem(uint256[] calldata tokenIds, address to) public {
+        for (uint256 i; i < tokenIds.length; ++i) {
+            nft.transferFrom(address(this), to, tokenIds[i]);
         }
-        _burn(msg.sender, unitsPerNFT * (10 ** decimals_) * nounIds.length);
+        _burn(msg.sender, unitsPerNFT * (10 ** decimals_) * tokenIds.length);
     }
+
+    function _authorizeUpgrade(address) internal override onlyOwner { }
 }
