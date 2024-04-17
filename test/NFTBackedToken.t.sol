@@ -130,6 +130,28 @@ contract NFTBackedTokenTest is Test {
         vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, address(this)));
         token.disableUpgrades();
     }
+
+    function test_balanceToBackingNFTCount() public {
+        address holder = makeAddr("holder");
+        assertEq(token.balanceToBackingNFTCount(holder), 0);
+
+        vm.startPrank(NOUNDERS);
+        NOUNS_TOKEN.approve(address(token), 1030);
+        NOUNS_TOKEN.approve(address(token), 1040);
+        NOUNS_TOKEN.approve(address(token), 1050);
+        NOUNS_TOKEN.approve(address(token), 1060);
+        nounIds = [1030, 1040, 1050, 1060];
+        token.deposit(nounIds, NOUNDERS);
+
+        token.transfer(holder, 2_000_000 * 1e18);
+        assertEq(token.balanceToBackingNFTCount(holder), 2);
+
+        token.transfer(holder, 999_999 * 1e18); // balance is now 2.999M, still rounding down to 2
+        assertEq(token.balanceToBackingNFTCount(holder), 2);
+
+        token.transfer(holder, 1 * 1e18);
+        assertEq(token.balanceToBackingNFTCount(holder), 3);
+    }
 }
 
 contract NewContract is NFTBackedToken, ERC20VotesUpgradeable {
