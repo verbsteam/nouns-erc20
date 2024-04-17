@@ -7,8 +7,15 @@ import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { IERC721 } from "./libs/IERC721.sol";
 import { UUPSUpgradeable } from "./libs/UUPSUpgradeable.sol";
+import { PausableUpgradeable } from
+    "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
-contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgradeable {
+contract NFTBackedToken is
+    ERC20PermitUpgradeable,
+    UUPSUpgradeable,
+    OwnableUpgradeable,
+    PausableUpgradeable
+{
     IERC721 public nft;
     uint8 public decimals_;
     uint88 public amountPerNFT;
@@ -17,6 +24,11 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
 
     modifier onlyOwnerOrAdmin() {
         require(msg.sender == admin || msg.sender == owner(), "must be admin or owner");
+        _;
+    }
+
+    modifier onlyAdmin() {
+        require(msg.sender == admin, "must be admin");
         _;
     }
 
@@ -86,6 +98,14 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
 
     function burnAdminPower() public onlyOwnerOrAdmin {
         admin = address(0);
+    }
+
+    function pause() external onlyAdmin {
+        _pause();
+    }
+
+    function unpause() external onlyOwnerOrAdmin {
+        _unpause();
     }
 
     function _authorizeUpgrade(address) internal view override onlyOwner {

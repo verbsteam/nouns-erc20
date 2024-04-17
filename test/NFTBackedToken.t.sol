@@ -172,6 +172,43 @@ contract NFTBackedTokenTest is Test {
         vm.expectRevert("must be admin or owner");
         token.burnAdminPower();
     }
+
+    function test_pause_worksForAdmin() public {
+        vm.startPrank(admin);
+        token.pause();
+        assert(token.paused());
+    }
+
+    function test_pause_givenSenderNotAdmin_reverts() public {
+        vm.startPrank(makeAddr("not admin"));
+        vm.expectRevert("must be admin");
+        token.pause();
+    }
+
+    function test_unpause_worksForAdmin() public {
+        vm.startPrank(admin);
+        token.pause();
+        assert(token.paused());
+
+        token.unpause();
+        assert(!token.paused());
+    }
+
+    function test_unpause_worksForOwner() public {
+        vm.startPrank(admin);
+        token.pause();
+        assert(token.paused());
+
+        changePrank(TIMELOCK);
+        token.unpause();
+        assert(!token.paused());
+    }
+
+    function test_unpause_givenSenderNotAdminNorOwner_reverts() public {
+        vm.startPrank(makeAddr("not admin nor owner"));
+        vm.expectRevert("must be admin or owner");
+        token.unpause();
+    }
 }
 
 contract NewContract is NFTBackedToken, ERC20VotesUpgradeable {
