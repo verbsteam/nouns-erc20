@@ -15,7 +15,7 @@ import { ERC20Upgradeable } from
 import { NoncesUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
 
 contract NFTBackedTokenTest is Test {
-    address constant NOUNS_TOKEN = 0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03;
+    IERC721 constant NOUNS_TOKEN = IERC721(0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03);
     address constant NOUNDERS = 0x2573C60a6D127755aA2DC85e342F7da2378a0Cc5;
     address constant TIMELOCK = 0xb1a32FC9F9D8b2cf86C068Cae13108809547ef71;
     NFTBackedToken token;
@@ -33,7 +33,7 @@ contract NFTBackedTokenTest is Test {
                 name: "Nouns",
                 symbol: "NOUNS",
                 decimals: 18,
-                erc721Token: NOUNS_TOKEN,
+                erc721Token: address(NOUNS_TOKEN),
                 amountPerNFT: AMOUNT_PER_NFT_18_DECIMALS
             })
         );
@@ -50,33 +50,55 @@ contract NFTBackedTokenTest is Test {
     function test_deposit() public {
         nounIds = [1060, 1050];
         vm.startPrank(NOUNDERS);
-        IERC721(NOUNS_TOKEN).approve(address(token), 1050);
-        IERC721(NOUNS_TOKEN).approve(address(token), 1060);
+        NOUNS_TOKEN.approve(address(token), 1050);
+        NOUNS_TOKEN.approve(address(token), 1060);
         token.deposit(nounIds, NOUNDERS);
 
         assertEq(token.balanceOf(NOUNDERS), 2_000_000 * 1e18);
-        assertEq(IERC721(NOUNS_TOKEN).ownerOf(1050), address(token));
-        assertEq(IERC721(NOUNS_TOKEN).ownerOf(1060), address(token));
+        assertEq(NOUNS_TOKEN.ownerOf(1050), address(token));
+        assertEq(NOUNS_TOKEN.ownerOf(1060), address(token));
     }
 
     function test_redeem() public {
         nounIds = [1060, 1050];
         vm.startPrank(NOUNDERS);
-        IERC721(NOUNS_TOKEN).approve(address(token), 1050);
-        IERC721(NOUNS_TOKEN).approve(address(token), 1060);
+        NOUNS_TOKEN.approve(address(token), 1050);
+        NOUNS_TOKEN.approve(address(token), 1060);
         token.deposit(nounIds, NOUNDERS);
 
         token.redeem(nounIds, address(0x123));
         assertEq(token.balanceOf(NOUNDERS), 0);
-        assertEq(IERC721(NOUNS_TOKEN).ownerOf(1050), address(0x123));
-        assertEq(IERC721(NOUNS_TOKEN).ownerOf(1060), address(0x123));
+        assertEq(NOUNS_TOKEN.ownerOf(1050), address(0x123));
+        assertEq(NOUNS_TOKEN.ownerOf(1060), address(0x123));
+    }
+
+    function test_swap() public {
+        address swapRecipient = makeAddr("swap recipient");
+
+        vm.startPrank(NOUNDERS);
+        NOUNS_TOKEN.approve(address(token), 1030);
+        NOUNS_TOKEN.approve(address(token), 1040);
+        NOUNS_TOKEN.approve(address(token), 1050);
+        NOUNS_TOKEN.approve(address(token), 1060);
+        nounIds = [1050, 1060];
+        token.deposit(nounIds, NOUNDERS);
+        uint256[] memory tokensIn = new uint256[](2);
+        tokensIn[0] = 1030;
+        tokensIn[1] = 1040;
+
+        token.swap(tokensIn, nounIds, swapRecipient);
+
+        assertEq(NOUNS_TOKEN.ownerOf(1030), address(token));
+        assertEq(NOUNS_TOKEN.ownerOf(1040), address(token));
+        assertEq(NOUNS_TOKEN.ownerOf(1050), swapRecipient);
+        assertEq(NOUNS_TOKEN.ownerOf(1060), swapRecipient);
     }
 
     function test_upgrade() public {
         nounIds = [1060, 1050];
         vm.startPrank(NOUNDERS);
-        IERC721(NOUNS_TOKEN).approve(address(token), 1050);
-        IERC721(NOUNS_TOKEN).approve(address(token), 1060);
+        NOUNS_TOKEN.approve(address(token), 1050);
+        NOUNS_TOKEN.approve(address(token), 1060);
         token.deposit(nounIds, NOUNDERS);
         vm.stopPrank();
 

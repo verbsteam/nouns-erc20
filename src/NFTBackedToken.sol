@@ -58,5 +58,14 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
         _burn(msg.sender, amountPerNFT * tokenIds.length);
     }
 
+    function swap(uint256[] calldata tokensIn, uint256[] calldata tokensOut, address to) public {
+        require(tokensIn.length == tokensOut.length, "NFTBackedToken: length mismatch");
+
+        for (uint256 i; i < tokensIn.length; ++i) {
+            nft.transferFrom(msg.sender, address(this), tokensIn[i]);
+            nft.transferFrom(address(this), to, tokensOut[i]);
+        }
+    }
+
     function _authorizeUpgrade(address) internal override onlyOwner { }
 }
