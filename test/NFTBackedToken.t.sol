@@ -21,6 +21,8 @@ contract NFTBackedTokenTest is Test {
     NFTBackedToken token;
     uint256[] nounIds;
 
+    uint88 constant AMOUNT_PER_NFT_18_DECIMALS = 1_000_000 * 1e18;
+
     function setUp() public {
         vm.createSelectFork(vm.envString("RPC_MAINNET"), 19538905);
 
@@ -32,7 +34,7 @@ contract NFTBackedTokenTest is Test {
                 symbol: "NOUNS",
                 decimals: 18,
                 erc721Token: NOUNS_TOKEN,
-                amountPerNFT: 1_000_000
+                amountPerNFT: AMOUNT_PER_NFT_18_DECIMALS
             })
         );
     }

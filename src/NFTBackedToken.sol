@@ -13,6 +13,16 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
     uint8 public decimals_;
     uint88 public amountPerNFT;
 
+    /**
+     *
+     * @param owner_ the owner of this contract, which can upgrade the contract.
+     * @param name_  the name of the ERC20 token.
+     * @param symbol_  the symbol of the ERC20 token.
+     * @param decimals__ the decimals of the ERC20 token.
+     * @param nft_ the ERC721 token backing this ERC20 token.
+     * @param amountPerNFT_ the amount of ERC20 token minted per NFT, adjusted to its decimals; for example, if
+     * decimals is 18, and amountPerNFT is 1_000_000, then this parameter's value should be 1M * 10^18.
+     */
     function initialize(
         address owner_,
         string calldata name_,
@@ -38,14 +48,14 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
         for (uint256 i; i < tokenIds.length; ++i) {
             nft.transferFrom(msg.sender, address(this), tokenIds[i]);
         }
-        _mint(to, amountPerNFT * (10 ** decimals_) * tokenIds.length);
+        _mint(to, amountPerNFT * tokenIds.length);
     }
 
     function redeem(uint256[] calldata tokenIds, address to) public {
         for (uint256 i; i < tokenIds.length; ++i) {
             nft.transferFrom(address(this), to, tokenIds[i]);
         }
-        _burn(msg.sender, amountPerNFT * (10 ** decimals_) * tokenIds.length);
+        _burn(msg.sender, amountPerNFT * tokenIds.length);
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner { }
