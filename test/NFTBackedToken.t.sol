@@ -27,12 +27,12 @@ contract NFTBackedTokenTest is Test {
         TokenDeployer tokenDeployer = new TokenDeployer();
         token = NFTBackedToken(
             tokenDeployer.deployToken({
-                erc721Token: NOUNS_TOKEN,
                 owner: TIMELOCK,
                 name: "Nouns",
                 symbol: "NOUNS",
                 decimals: 18,
-                unitsPerNFT: 1_000_000
+                erc721Token: NOUNS_TOKEN,
+                amountPerNFT: 1_000_000
             })
         );
     }

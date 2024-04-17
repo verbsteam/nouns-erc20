@@ -12,15 +12,15 @@ contract TokenDeployer {
     }
 
     function deployToken(
-        address erc721Token,
         address owner,
         string calldata name,
         string calldata symbol,
         uint8 decimals,
-        uint88 unitsPerNFT
+        address erc721Token,
+        uint88 amountPerNFT
     ) public returns (address) {
         NFTBackedToken token = NFTBackedToken(LibClone.deployERC1967(address(tokenImpl)));
-        token.initialize(erc721Token, owner, name, symbol, decimals, unitsPerNFT);
+        token.initialize(owner, name, symbol, decimals, erc721Token, amountPerNFT);
 
         return address(token);
     }

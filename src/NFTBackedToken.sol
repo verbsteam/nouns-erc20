@@ -11,22 +11,22 @@ import { UUPSUpgradeable } from "./libs/UUPSUpgradeable.sol";
 contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgradeable {
     IERC721 public nft;
     uint8 public decimals_;
-    uint88 public unitsPerNFT;
+    uint88 public amountPerNFT;
 
     function initialize(
-        address nft_,
         address owner_,
         string calldata name_,
         string calldata symbol_,
         uint8 decimals__,
-        uint88 unitsPerNFT_
+        address nft_,
+        uint88 amountPerNFT_
     ) public initializer {
-        nft = IERC721(nft_);
-        decimals_ = decimals__;
-        unitsPerNFT = unitsPerNFT_;
         __Ownable_init(owner_);
         __ERC20_init(name_, symbol_);
         __ERC20Permit_init(name_);
+        decimals_ = decimals__;
+        nft = IERC721(nft_);
+        amountPerNFT = amountPerNFT_;
     }
 
     /// @dev Returns the decimals places of the token.
@@ -38,14 +38,14 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
         for (uint256 i; i < tokenIds.length; ++i) {
             nft.transferFrom(msg.sender, address(this), tokenIds[i]);
         }
-        _mint(to, unitsPerNFT * (10 ** decimals_) * tokenIds.length);
+        _mint(to, amountPerNFT * (10 ** decimals_) * tokenIds.length);
     }
 
     function redeem(uint256[] calldata tokenIds, address to) public {
         for (uint256 i; i < tokenIds.length; ++i) {
             nft.transferFrom(address(this), to, tokenIds[i]);
         }
-        _burn(msg.sender, unitsPerNFT * (10 ** decimals_) * tokenIds.length);
+        _burn(msg.sender, amountPerNFT * (10 ** decimals_) * tokenIds.length);
     }
 
     function _authorizeUpgrade(address) internal override onlyOwner { }
