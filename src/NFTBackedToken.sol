@@ -65,21 +65,24 @@ contract NFTBackedToken is
         return decimals_;
     }
 
-    function deposit(uint256[] calldata tokenIds, address to) public {
+    function deposit(uint256[] calldata tokenIds, address to) public whenNotPaused {
         for (uint256 i; i < tokenIds.length; ++i) {
             nft.transferFrom(msg.sender, address(this), tokenIds[i]);
         }
         _mint(to, amountPerNFT * tokenIds.length);
     }
 
-    function redeem(uint256[] calldata tokenIds, address to) public {
+    function redeem(uint256[] calldata tokenIds, address to) public whenNotPaused {
         for (uint256 i; i < tokenIds.length; ++i) {
             nft.transferFrom(address(this), to, tokenIds[i]);
         }
         _burn(msg.sender, amountPerNFT * tokenIds.length);
     }
 
-    function swap(uint256[] calldata tokensIn, uint256[] calldata tokensOut, address to) public {
+    function swap(uint256[] calldata tokensIn, uint256[] calldata tokensOut, address to)
+        public
+        whenNotPaused
+    {
         require(tokensIn.length == tokensOut.length, "NFTBackedToken: length mismatch");
 
         for (uint256 i; i < tokensIn.length; ++i) {

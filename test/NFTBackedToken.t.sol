@@ -16,6 +16,7 @@ import { NoncesUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/Non
 
 contract NFTBackedTokenTest is Test {
     error OwnableUnauthorizedAccount(address account);
+    error EnforcedPause();
 
     IERC721 constant NOUNS_TOKEN = IERC721(0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03);
     address constant NOUNDERS = 0x2573C60a6D127755aA2DC85e342F7da2378a0Cc5;
@@ -63,6 +64,14 @@ contract NFTBackedTokenTest is Test {
         assertEq(NOUNS_TOKEN.ownerOf(1060), address(token));
     }
 
+    function test_deposit_whenPaused_reverts() public {
+        vm.prank(admin);
+        token.pause();
+
+        vm.expectRevert(EnforcedPause.selector);
+        token.deposit(nounIds, NOUNDERS);
+    }
+
     function test_redeem() public {
         nounIds = [1060, 1050];
         vm.startPrank(NOUNDERS);
@@ -74,6 +83,14 @@ contract NFTBackedTokenTest is Test {
         assertEq(token.balanceOf(NOUNDERS), 0);
         assertEq(NOUNS_TOKEN.ownerOf(1050), address(0x123));
         assertEq(NOUNS_TOKEN.ownerOf(1060), address(0x123));
+    }
+
+    function test_redeem_whenPaused_reverts() public {
+        changePrank(admin);
+        token.pause();
+
+        vm.expectRevert(EnforcedPause.selector);
+        token.redeem(nounIds, address(0x123));
     }
 
     function test_swap() public {
@@ -96,6 +113,15 @@ contract NFTBackedTokenTest is Test {
         assertEq(NOUNS_TOKEN.ownerOf(1040), address(token));
         assertEq(NOUNS_TOKEN.ownerOf(1050), swapRecipient);
         assertEq(NOUNS_TOKEN.ownerOf(1060), swapRecipient);
+    }
+
+    function test_swap_whenPaused_reverts() public {
+        changePrank(admin);
+        token.pause();
+
+        uint256[] memory tokensIn = new uint256[](0);
+        vm.expectRevert(EnforcedPause.selector);
+        token.swap(tokensIn, nounIds, NOUNDERS);
     }
 
     function test_upgrade() public {
