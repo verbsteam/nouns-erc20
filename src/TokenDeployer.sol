@@ -18,11 +18,89 @@ contract TokenDeployer {
         uint8 decimals,
         address erc721Token,
         uint88 amountPerNFT,
-        address admin
-    ) public returns (address) {
-        NFTBackedToken token = NFTBackedToken(LibClone.deployERC1967(address(tokenImpl)));
-        token.initialize(owner, name, symbol, decimals, erc721Token, amountPerNFT, admin);
+        address admin,
+        uint8 nonce,
+        address predictedTokenAddress
+    ) external returns (address token) {
+        token = deployToken(owner, name, symbol, decimals, erc721Token, amountPerNFT, admin, nonce);
+        require(token == predictedTokenAddress, "token address does not match predicted address");
+    }
 
+    function deployToken(
+        address owner,
+        string calldata name,
+        string calldata symbol,
+        uint8 decimals,
+        address erc721Token,
+        uint88 amountPerNFT,
+        address admin
+    ) external returns (address) {
+        return deployToken(owner, name, symbol, decimals, erc721Token, amountPerNFT, admin, 0);
+    }
+
+    function deployToken(
+        address owner,
+        string calldata name,
+        string calldata symbol,
+        uint8 decimals,
+        address erc721Token,
+        uint88 amountPerNFT,
+        address admin,
+        uint8 nonce
+    ) public returns (address) {
+        NFTBackedToken token = NFTBackedToken(
+            LibClone.deployDeterministicERC1967(
+                address(tokenImpl),
+                salt(
+                    msg.sender,
+                    owner,
+                    name,
+                    symbol,
+                    decimals,
+                    erc721Token,
+                    amountPerNFT,
+                    admin,
+                    nonce
+                )
+            )
+        );
+        token.initialize(owner, name, symbol, decimals, erc721Token, amountPerNFT, admin);
         return address(token);
+    }
+
+    function predictTokenAddress(
+        address msgSender,
+        address owner,
+        string calldata name,
+        string calldata symbol,
+        uint8 decimals,
+        address erc721Token,
+        uint88 amountPerNFT,
+        address admin,
+        uint8 nonce
+    ) external view returns (address) {
+        return LibClone.predictDeterministicAddress(
+            LibClone.initCodeHashERC1967(tokenImpl),
+            salt(msgSender, owner, name, symbol, decimals, erc721Token, amountPerNFT, admin, nonce),
+            address(this)
+        );
+    }
+
+    function salt(
+        address msgSender,
+        address owner,
+        string calldata name,
+        string calldata symbol,
+        uint8 decimals,
+        address erc721Token,
+        uint88 amountPerNFT,
+        address admin,
+        uint8 nonce
+    ) internal pure returns (bytes32) {
+        return keccak256(
+            abi.encodePacked(
+                msgSender, owner, name, symbol, decimals, erc721Token, amountPerNFT, admin, nonce
+            )
+        );
     }
 }
