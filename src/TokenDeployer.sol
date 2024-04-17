@@ -17,10 +17,11 @@ contract TokenDeployer {
         string calldata symbol,
         uint8 decimals,
         address erc721Token,
-        uint88 amountPerNFT
+        uint88 amountPerNFT,
+        address admin
     ) public returns (address) {
         NFTBackedToken token = NFTBackedToken(LibClone.deployERC1967(address(tokenImpl)));
-        token.initialize(owner, name, symbol, decimals, erc721Token, amountPerNFT);
+        token.initialize(owner, name, symbol, decimals, erc721Token, amountPerNFT, admin);
 
         return address(token);
     }

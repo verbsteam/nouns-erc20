@@ -13,6 +13,12 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
     uint8 public decimals_;
     uint88 public amountPerNFT;
     bool public upgradesDisabled;
+    address public admin;
+
+    modifier onlyOwnerOrAdmin() {
+        require(msg.sender == admin || msg.sender == owner(), "must be admin or owner");
+        _;
+    }
 
     /**
      *
@@ -30,7 +36,8 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
         string calldata symbol_,
         uint8 decimals__,
         address nft_,
-        uint88 amountPerNFT_
+        uint88 amountPerNFT_,
+        address admin_
     ) public initializer {
         __Ownable_init(owner_);
         __ERC20_init(name_, symbol_);
@@ -38,6 +45,7 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
         decimals_ = decimals__;
         nft = IERC721(nft_);
         amountPerNFT = amountPerNFT_;
+        admin = admin_;
     }
 
     /// @dev Returns the decimals places of the token.
@@ -74,6 +82,10 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
 
     function disableUpgrades() public onlyOwner {
         upgradesDisabled = true;
+    }
+
+    function burnAdminPower() public onlyOwnerOrAdmin {
+        admin = address(0);
     }
 
     function _authorizeUpgrade(address) internal view override onlyOwner {

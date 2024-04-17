@@ -22,6 +22,7 @@ contract NFTBackedTokenTest is Test {
     address constant TIMELOCK = 0xb1a32FC9F9D8b2cf86C068Cae13108809547ef71;
     NFTBackedToken token;
     uint256[] nounIds;
+    address admin = makeAddr("token admin");
 
     uint88 constant AMOUNT_PER_NFT_18_DECIMALS = 1_000_000 * 1e18;
 
@@ -36,7 +37,8 @@ contract NFTBackedTokenTest is Test {
                 symbol: "NOUNS",
                 decimals: 18,
                 erc721Token: address(NOUNS_TOKEN),
-                amountPerNFT: AMOUNT_PER_NFT_18_DECIMALS
+                amountPerNFT: AMOUNT_PER_NFT_18_DECIMALS,
+                admin: admin
             })
         );
     }
@@ -151,6 +153,24 @@ contract NFTBackedTokenTest is Test {
 
         token.transfer(holder, 1 * 1e18);
         assertEq(token.balanceToBackingNFTCount(holder), 3);
+    }
+
+    function test_burnAdminPower_worksForAdmin() public {
+        vm.startPrank(admin);
+        token.burnAdminPower();
+        assertEq(token.admin(), address(0));
+    }
+
+    function test_burnAdminPower_worksForOwner() public {
+        vm.startPrank(TIMELOCK);
+        token.burnAdminPower();
+        assertEq(token.admin(), address(0));
+    }
+
+    function test_burnAdminPower_givenSenderNotAdminNorOwner_reverts() public {
+        vm.startPrank(makeAddr("not admin nor owner"));
+        vm.expectRevert("must be admin or owner");
+        token.burnAdminPower();
     }
 }
 
