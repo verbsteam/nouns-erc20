@@ -15,6 +15,8 @@ import { ERC20Upgradeable } from
 import { NoncesUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
 
 contract NFTBackedTokenTest is Test {
+    error OwnableUnauthorizedAccount(address account);
+
     IERC721 constant NOUNS_TOKEN = IERC721(0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03);
     address constant NOUNDERS = 0x2573C60a6D127755aA2DC85e342F7da2378a0Cc5;
     address constant TIMELOCK = 0xb1a32FC9F9D8b2cf86C068Cae13108809547ef71;
@@ -112,6 +114,21 @@ contract NFTBackedTokenTest is Test {
         vm.prank(NOUNDERS);
         token2.delegate(NOUNDERS);
         assertEq(token2.getVotes(NOUNDERS), 2_000_000 * 1e18);
+    }
+
+    function test_upgradeToAndCall_givenDisabledUpgrades_reverts() public {
+        vm.prank(TIMELOCK);
+        token.disableUpgrades();
+
+        address newImpl = address(new NewContract());
+        vm.prank(TIMELOCK);
+        vm.expectRevert("upgrades disabled");
+        token.upgradeToAndCall(newImpl, bytes(""));
+    }
+
+    function test_disableUpgrades_givenSenderNotOwner_reverts() public {
+        vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, address(this)));
+        token.disableUpgrades();
     }
 }
 

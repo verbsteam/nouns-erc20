@@ -12,6 +12,7 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
     IERC721 public nft;
     uint8 public decimals_;
     uint88 public amountPerNFT;
+    bool public upgradesDisabled;
 
     /**
      *
@@ -67,5 +68,11 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
         }
     }
 
-    function _authorizeUpgrade(address) internal override onlyOwner { }
+    function disableUpgrades() public onlyOwner {
+        upgradesDisabled = true;
+    }
+
+    function _authorizeUpgrade(address) internal view override onlyOwner {
+        require(!upgradesDisabled, "upgrades disabled");
+    }
 }
