@@ -91,6 +91,10 @@ contract NFTBackedToken is
 
         for (uint256 i; i < tokensIn.length; ++i) {
             nft.transferFrom(msg.sender, address(this), tokensIn[i]);
+            // the spec says `tokensIn` must be owned by msg.sender. it's possible to do a swap like this:
+            // tokensIn: [0, 1], tokensOut: [1, 2]
+            // then msg.sender doesn't need to own id 1.
+            // couldn't think of a way it can do damage, but maybe I missed something?
             nft.transferFrom(address(this), to, tokensOut[i]);
         }
     }
