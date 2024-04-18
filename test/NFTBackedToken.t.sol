@@ -85,6 +85,8 @@ contract NFTBackedTokenTest is Test {
         assertEq(NOUNS_TOKEN.ownerOf(1060), address(0x123));
     }
 
+    // Add a test that redeem fails when not enough $nouns to burn?
+
     function test_redeem_whenPaused_reverts() public {
         changePrank(admin);
         token.pause();

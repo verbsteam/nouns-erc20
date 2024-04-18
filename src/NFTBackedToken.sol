@@ -7,6 +7,7 @@ import { OwnableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { IERC721 } from "./libs/IERC721.sol";
 import { UUPSUpgradeable } from "./libs/UUPSUpgradeable.sol";
+// we can probably use UUPSUpgradeable from OZ instead of solady? I used the solady one before bringing OZ as a dependency
 import { PausableUpgradeable } from
     "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
@@ -18,9 +19,10 @@ contract NFTBackedToken is
 {
     IERC721 public nft;
     uint8 public decimals_;
-    uint88 public amountPerNFT;
+    uint88 public amountPerNFT; // with 18 decimals, the max number here is ~309M. should we make this variable larger?
     bool public upgradesDisabled;
     address public admin;
+    // do we want to use a keccak based location for easier future upgrades?
 
     modifier onlyOwnerOrAdmin() {
         require(msg.sender == admin || msg.sender == owner(), "must be admin or owner");
@@ -31,6 +33,8 @@ contract NFTBackedToken is
         require(msg.sender == admin, "must be admin");
         _;
     }
+
+    // NFTBackedToken needs a constructor with initializer
 
     /**
      *
@@ -53,7 +57,7 @@ contract NFTBackedToken is
     ) public initializer {
         __Ownable_init(owner_);
         __ERC20_init(name_, symbol_);
-        __ERC20Permit_init(name_);
+        __ERC20Permit_init(name_); // do we want to add some test for the permit? or no need?
         decimals_ = decimals__;
         nft = IERC721(nft_);
         amountPerNFT = amountPerNFT_;
