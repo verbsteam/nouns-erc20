@@ -29,7 +29,7 @@ contract NFTBackedTokenTest is Test {
     uint256[] nounIds;
     address admin = makeAddr("token admin");
 
-    uint88 constant AMOUNT_PER_NFT_18_DECIMALS = 1_000_000 * 1e18;
+    uint96 constant AMOUNT_PER_NFT_18_DECIMALS = 1_000_000 * 1e18;
 
     function setUp() public {
         vm.createSelectFork(vm.envString("RPC_MAINNET"), 19538905);

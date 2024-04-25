@@ -12,7 +12,7 @@ contract TokenDeployer {
         string symbol,
         uint8 decimals,
         address erc721Token,
-        uint88 amountPerNFT,
+        uint96 amountPerNFT,
         address admin,
         uint8 nonce,
         address tokenAddress
@@ -30,7 +30,7 @@ contract TokenDeployer {
         string calldata symbol,
         uint8 decimals,
         address erc721Token,
-        uint88 amountPerNFT,
+        uint96 amountPerNFT,
         address admin,
         uint8 nonce,
         address predictedTokenAddress
@@ -45,7 +45,7 @@ contract TokenDeployer {
         string calldata symbol,
         uint8 decimals,
         address erc721Token,
-        uint88 amountPerNFT,
+        uint96 amountPerNFT,
         address admin
     ) external returns (address) {
         return deployToken(owner, name, symbol, decimals, erc721Token, amountPerNFT, admin, 0);
@@ -57,7 +57,7 @@ contract TokenDeployer {
         string calldata symbol,
         uint8 decimals,
         address erc721Token,
-        uint88 amountPerNFT,
+        uint96 amountPerNFT,
         address admin,
         uint8 nonce
     ) public returns (address) {
@@ -83,7 +83,7 @@ contract TokenDeployer {
         string calldata symbol,
         uint8 decimals,
         address erc721Token,
-        uint88 amountPerNFT,
+        uint96 amountPerNFT,
         address admin,
         uint8 nonce
     ) external view returns (address) {
@@ -101,7 +101,7 @@ contract TokenDeployer {
         string calldata symbol,
         uint8 decimals,
         address erc721Token,
-        uint88 amountPerNFT,
+        uint96 amountPerNFT,
         address admin,
         uint8 nonce
     ) internal pure returns (bytes32) {

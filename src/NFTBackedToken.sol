@@ -16,10 +16,10 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
     /// @custom:storage-location erc7201:nouns.storage.NFTBackedToken
     struct NFTBackedTokenStorage {
         IERC721 nft;
-        uint8 decimals;
-        uint88 amountPerNFT;
-        bool upgradesDisabled;
+        uint96 amountPerNFT;
         address admin;
+        uint8 decimals;
+        bool upgradesDisabled;
     }
 
     // keccak256(abi.encode(uint256(keccak256("nouns.storage.NFTBackedToken")) - 1)) & ~bytes32(uint256(0xff))
@@ -62,7 +62,7 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
         string calldata symbol_,
         uint8 decimals_,
         address nft_,
-        uint88 amountPerNFT_,
+        uint96 amountPerNFT_,
         address admin_
     ) public initializer {
         __Ownable_init(owner_);
@@ -129,7 +129,7 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
         return $.nft;
     }
 
-    function amountPerNFT() public view returns (uint88) {
+    function amountPerNFT() public view returns (uint96) {
         NFTBackedTokenStorage storage $ = _getNFTBackedTokenStorage();
         return $.amountPerNFT;
     }

@@ -12,7 +12,7 @@ contract TokenDeployerTest is Test {
         string symbol,
         uint8 decimals,
         address erc721Token,
-        uint88 amountPerNFT,
+        uint96 amountPerNFT,
         address admin,
         uint8 nonce,
         address tokenAddress
