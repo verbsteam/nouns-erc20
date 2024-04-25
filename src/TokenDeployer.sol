@@ -5,6 +5,19 @@ import { NFTBackedToken } from "./NFTBackedToken.sol";
 import { LibClone } from "./libs/LibClone.sol";
 
 contract TokenDeployer {
+    event TokenDeployed(
+        address indexed msgSender,
+        address indexed owner,
+        string name,
+        string symbol,
+        uint8 decimals,
+        address erc721Token,
+        uint88 amountPerNFT,
+        address admin,
+        uint8 nonce,
+        address tokenAddress
+    );
+
     address public immutable tokenImpl;
 
     constructor() {
@@ -65,6 +78,20 @@ contract TokenDeployer {
             )
         );
         token.initialize(owner, name, symbol, decimals, erc721Token, amountPerNFT, admin);
+
+        emit TokenDeployed(
+            msg.sender,
+            owner,
+            name,
+            symbol,
+            decimals,
+            erc721Token,
+            amountPerNFT,
+            admin,
+            nonce,
+            address(token)
+        );
+
         return address(token);
     }
 

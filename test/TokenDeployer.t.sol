@@ -5,6 +5,19 @@ import { Test } from "forge-std/Test.sol";
 import { TokenDeployer } from "../src/TokenDeployer.sol";
 
 contract TokenDeployerTest is Test {
+    event TokenDeployed(
+        address indexed msgSender,
+        address indexed owner,
+        string name,
+        string symbol,
+        uint8 decimals,
+        address erc721Token,
+        uint88 amountPerNFT,
+        address admin,
+        uint8 nonce,
+        address tokenAddress
+    );
+
     TokenDeployer tokenDeployer = new TokenDeployer();
 
     function test_deployToken_givenWrongPredictedAddress_reverts() public {
@@ -34,6 +47,20 @@ contract TokenDeployerTest is Test {
             admin: makeAddr("admin"),
             nonce: 0
         });
+
+        vm.expectEmit(true, true, true, true);
+        emit TokenDeployed(
+            address(this),
+            makeAddr("owner"),
+            "Nouns",
+            "NOUNS",
+            18,
+            makeAddr("erc721Token"),
+            1_000_000 * 1e18,
+            makeAddr("admin"),
+            0,
+            predictedAddress
+        );
 
         tokenDeployer.deployToken({
             owner: makeAddr("owner"),
