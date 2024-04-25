@@ -9,6 +9,10 @@ import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils
 import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
 contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable {
+    event Deposit(uint256[] tokenIds, address indexed to);
+    event Redeem(uint256[] tokenIds, address indexed to);
+    event Swap(uint256[] tokensIn, uint256[] tokensOut, address indexed to);
+
     IERC721 public nft;
     uint8 public decimals_;
     uint88 public amountPerNFT;
@@ -63,6 +67,8 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
             nft.transferFrom(msg.sender, address(this), tokenIds[i]);
         }
         _mint(to, amountPerNFT * tokenIds.length);
+
+        emit Deposit(tokenIds, to);
     }
 
     function redeem(uint256[] calldata tokenIds, address to) public whenNotPaused {
@@ -70,6 +76,8 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
             nft.transferFrom(address(this), to, tokenIds[i]);
         }
         _burn(msg.sender, amountPerNFT * tokenIds.length);
+
+        emit Redeem(tokenIds, to);
     }
 
     function swap(uint256[] calldata tokensIn, uint256[] calldata tokensOut, address to) public whenNotPaused {
@@ -79,6 +87,8 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
             nft.transferFrom(msg.sender, address(this), tokensIn[i]);
             nft.transferFrom(address(this), to, tokensOut[i]);
         }
+
+        emit Swap(tokensIn, tokensOut, to);
     }
 
     function balanceToBackingNFTCount(address account) public view returns (uint256) {

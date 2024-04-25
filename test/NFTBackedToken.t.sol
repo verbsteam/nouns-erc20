@@ -14,6 +14,10 @@ import { ERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC2
 import { NoncesUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
 
 contract NFTBackedTokenTest is Test {
+    event Deposit(uint256[] tokenIds, address indexed to);
+    event Redeem(uint256[] tokenIds, address indexed to);
+    event Swap(uint256[] tokensIn, uint256[] tokensOut, address indexed to);
+
     error OwnableUnauthorizedAccount(address account);
     error EnforcedPause();
 
@@ -56,6 +60,10 @@ contract NFTBackedTokenTest is Test {
         vm.startPrank(NOUNDERS);
         NOUNS_TOKEN.approve(address(token), 1050);
         NOUNS_TOKEN.approve(address(token), 1060);
+
+        vm.expectEmit(true, true, true, true);
+        emit Deposit(nounIds, NOUNDERS);
+
         token.deposit(nounIds, NOUNDERS);
 
         assertEq(token.balanceOf(NOUNDERS), 2_000_000 * 1e18);
@@ -78,7 +86,11 @@ contract NFTBackedTokenTest is Test {
         NOUNS_TOKEN.approve(address(token), 1060);
         token.deposit(nounIds, NOUNDERS);
 
+        vm.expectEmit(true, true, true, true);
+        emit Redeem(nounIds, address(0x123));
+
         token.redeem(nounIds, address(0x123));
+
         assertEq(token.balanceOf(NOUNDERS), 0);
         assertEq(NOUNS_TOKEN.ownerOf(1050), address(0x123));
         assertEq(NOUNS_TOKEN.ownerOf(1060), address(0x123));
@@ -105,6 +117,9 @@ contract NFTBackedTokenTest is Test {
         uint256[] memory tokensIn = new uint256[](2);
         tokensIn[0] = 1030;
         tokensIn[1] = 1040;
+
+        vm.expectEmit(true, true, true, true);
+        emit Swap(tokensIn, nounIds, swapRecipient);
 
         token.swap(tokensIn, nounIds, swapRecipient);
 
