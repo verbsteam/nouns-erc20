@@ -119,7 +119,7 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
         return $.decimals;
     }
 
-    function balanceToBackingNFTCount(address account) public view returns (uint256) {
+    function redeemableNFTsBalance(address account) public view returns (uint256) {
         NFTBackedTokenStorage storage $ = _getNFTBackedTokenStorage();
         return balanceOf(account) / $.amountPerNFT;
     }

@@ -189,9 +189,9 @@ contract NFTBackedTokenTest is Test {
         token.disableUpgrades();
     }
 
-    function test_balanceToBackingNFTCount() public {
+    function test_redeemableNFTsBalance() public {
         address holder = makeAddr("holder");
-        assertEq(token.balanceToBackingNFTCount(holder), 0);
+        assertEq(token.redeemableNFTsBalance(holder), 0);
 
         vm.startPrank(NOUNDERS);
         NOUNS_TOKEN.approve(address(token), 1030);
@@ -202,13 +202,13 @@ contract NFTBackedTokenTest is Test {
         token.deposit(nounIds, NOUNDERS);
 
         token.transfer(holder, 2_000_000 * 1e18);
-        assertEq(token.balanceToBackingNFTCount(holder), 2);
+        assertEq(token.redeemableNFTsBalance(holder), 2);
 
         token.transfer(holder, 999_999 * 1e18); // balance is now 2.999M, still rounding down to 2
-        assertEq(token.balanceToBackingNFTCount(holder), 2);
+        assertEq(token.redeemableNFTsBalance(holder), 2);
 
         token.transfer(holder, 1 * 1e18);
-        assertEq(token.balanceToBackingNFTCount(holder), 3);
+        assertEq(token.redeemableNFTsBalance(holder), 3);
     }
 
     function test_burnAdminPower_worksForAdmin() public {
