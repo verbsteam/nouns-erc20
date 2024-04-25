@@ -87,6 +87,9 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
 
         for (uint256 i; i < tokensIn.length; ++i) {
             nft.transferFrom(msg.sender, address(this), tokensIn[i]);
+        }
+
+        for (uint256 i; i < tokensOut.length; ++i) {
             nft.transferFrom(address(this), to, tokensOut[i]);
         }
 
