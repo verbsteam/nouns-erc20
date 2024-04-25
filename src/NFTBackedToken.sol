@@ -3,20 +3,12 @@ pragma solidity ^0.8.13;
 
 import { ERC20PermitUpgradeable } from
     "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
-import { OwnableUpgradeable } from
-    "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import { OwnableUpgradeable } from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import { IERC721 } from "./libs/IERC721.sol";
-import { UUPSUpgradeable } from
-    "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import { PausableUpgradeable } from
-    "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import { PausableUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 
-contract NFTBackedToken is
-    ERC20PermitUpgradeable,
-    UUPSUpgradeable,
-    OwnableUpgradeable,
-    PausableUpgradeable
-{
+contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgradeable, PausableUpgradeable {
     IERC721 public nft;
     uint8 public decimals_;
     uint88 public amountPerNFT;
@@ -80,10 +72,7 @@ contract NFTBackedToken is
         _burn(msg.sender, amountPerNFT * tokenIds.length);
     }
 
-    function swap(uint256[] calldata tokensIn, uint256[] calldata tokensOut, address to)
-        public
-        whenNotPaused
-    {
+    function swap(uint256[] calldata tokensIn, uint256[] calldata tokensOut, address to) public whenNotPaused {
         require(tokensIn.length == tokensOut.length, "NFTBackedToken: length mismatch");
 
         for (uint256 i; i < tokensIn.length; ++i) {

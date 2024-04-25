@@ -64,32 +64,13 @@ contract TokenDeployer {
         NFTBackedToken token = NFTBackedToken(
             LibClone.deployDeterministicERC1967(
                 address(tokenImpl),
-                salt(
-                    msg.sender,
-                    owner,
-                    name,
-                    symbol,
-                    decimals,
-                    erc721Token,
-                    amountPerNFT,
-                    admin,
-                    nonce
-                )
+                salt(msg.sender, owner, name, symbol, decimals, erc721Token, amountPerNFT, admin, nonce)
             )
         );
         token.initialize(owner, name, symbol, decimals, erc721Token, amountPerNFT, admin);
 
         emit TokenDeployed(
-            msg.sender,
-            owner,
-            name,
-            symbol,
-            decimals,
-            erc721Token,
-            amountPerNFT,
-            admin,
-            nonce,
-            address(token)
+            msg.sender, owner, name, symbol, decimals, erc721Token, amountPerNFT, admin, nonce, address(token)
         );
 
         return address(token);
@@ -125,9 +106,7 @@ contract TokenDeployer {
         uint8 nonce
     ) internal pure returns (bytes32) {
         return keccak256(
-            abi.encodePacked(
-                msgSender, owner, name, symbol, decimals, erc721Token, amountPerNFT, admin, nonce
-            )
+            abi.encodePacked(msgSender, owner, name, symbol, decimals, erc721Token, amountPerNFT, admin, nonce)
         );
     }
 }
