@@ -20,6 +20,7 @@ contract NFTBackedTokenTest is Test {
 
     error OwnableUnauthorizedAccount(address account);
     error EnforcedPause();
+    error ERC20InsufficientBalance(address sender, uint256 balance, uint256 needed);
 
     IERC721 constant NOUNS_TOKEN = IERC721(0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03);
     address constant NOUNDERS = 0x2573C60a6D127755aA2DC85e342F7da2378a0Cc5;
@@ -94,6 +95,21 @@ contract NFTBackedTokenTest is Test {
         assertEq(token.balanceOf(NOUNDERS), 0);
         assertEq(NOUNS_TOKEN.ownerOf(1050), address(0x123));
         assertEq(NOUNS_TOKEN.ownerOf(1060), address(0x123));
+    }
+
+    function test_redeem_givenInsufficientERC20s_reverts() public {
+        nounIds = [1060, 1050];
+        vm.startPrank(NOUNDERS);
+        NOUNS_TOKEN.approve(address(token), 1050);
+        NOUNS_TOKEN.approve(address(token), 1060);
+        token.deposit(nounIds, NOUNDERS);
+
+        token.transfer(makeAddr("some recipient"), 1);
+
+        vm.expectRevert(
+            abi.encodeWithSelector(ERC20InsufficientBalance.selector, NOUNDERS, 2_000_000 * 1e18 - 1, 2_000_000 * 1e18)
+        );
+        token.redeem(nounIds, address(0x123));
     }
 
     function test_redeem_whenPaused_reverts() public {
