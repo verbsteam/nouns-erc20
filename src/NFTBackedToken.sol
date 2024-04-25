@@ -29,6 +29,8 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
         _;
     }
 
+    constructor() initializer { }
+
     /**
      *
      * @param owner_ the owner of this contract, which can upgrade the contract.
