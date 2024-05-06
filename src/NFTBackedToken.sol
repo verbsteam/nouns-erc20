@@ -119,21 +119,34 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
         return $.decimals;
     }
 
+    /**
+     * @notice The balance of redeemable NFTs for an account.
+     * For example, if the amountPerNFT is 1M, and the account has 1.2M tokens, the redeemable balance is 1.
+     */
     function redeemableNFTsBalance(address account) public view returns (uint256) {
         NFTBackedTokenStorage storage $ = _getNFTBackedTokenStorage();
         return balanceOf(account) / $.amountPerNFT;
     }
 
+    /**
+     * @notice The ERC721 token backing this ERC20 token.
+     */
     function nft() public view returns (IERC721) {
         NFTBackedTokenStorage storage $ = _getNFTBackedTokenStorage();
         return $.nft;
     }
 
+    /**
+     * @notice The exchange rate between one backing NFT and this ERC20 contract, in ERC20's decimal units.
+     */
     function amountPerNFT() public view returns (uint96) {
         NFTBackedTokenStorage storage $ = _getNFTBackedTokenStorage();
         return $.amountPerNFT;
     }
 
+    /**
+     * @notice The admin of this contract, which can pause and unpause the contract, and burn their admin power.
+     */
     function admin() public view returns (address) {
         NFTBackedTokenStorage storage $ = _getNFTBackedTokenStorage();
         return $.admin;
