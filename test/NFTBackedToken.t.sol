@@ -271,8 +271,13 @@ contract NFTBackedTokenTest is Test {
         SigUtils sigUtils = new SigUtils(token.DOMAIN_SEPARATOR());
         (address owner, uint256 ownerPK) = makeAddrAndKey("owner");
         address spender = makeAddr("spender");
-        SigUtils.Permit memory permit =
-            SigUtils.Permit({ owner: owner, spender: spender, value: 42 * 1e18, nonce: 0, deadline: block.timestamp + 1 days });
+        SigUtils.Permit memory permit = SigUtils.Permit({
+            owner: owner,
+            spender: spender,
+            value: 42 * 1e18,
+            nonce: 0,
+            deadline: block.timestamp + 1 days
+        });
         bytes32 digest = sigUtils.getTypedDataHash(permit);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(ownerPK, digest);
 
