@@ -12,6 +12,7 @@ import { ERC20PermitUpgradeable } from
     "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/ERC20PermitUpgradeable.sol";
 import { ERC20Upgradeable } from "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import { NoncesUpgradeable } from "@openzeppelin/contracts-upgradeable/utils/NoncesUpgradeable.sol";
+import { SigUtils } from "./SigUtils.sol";
 
 contract NFTBackedTokenTest is Test {
     event Deposit(uint256[] tokenIds, address indexed to);
@@ -264,6 +265,21 @@ contract NFTBackedTokenTest is Test {
         vm.startPrank(makeAddr("not admin nor owner"));
         vm.expectRevert("must be admin or owner");
         token.unpause();
+    }
+
+    function test_permit_works() public {
+        SigUtils sigUtils = new SigUtils(token.DOMAIN_SEPARATOR());
+        (address owner, uint256 ownerPK) = makeAddrAndKey("owner");
+        address spender = makeAddr("spender");
+        SigUtils.Permit memory permit =
+            SigUtils.Permit({ owner: owner, spender: spender, value: 42 * 1e18, nonce: 0, deadline: block.timestamp + 1 days });
+        bytes32 digest = sigUtils.getTypedDataHash(permit);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(ownerPK, digest);
+
+        token.permit(permit.owner, permit.spender, permit.value, permit.deadline, v, r, s);
+
+        assertEq(token.allowance(owner, spender), 42 * 1e18);
+        assertEq(token.nonces(owner), 1);
     }
 }
 
