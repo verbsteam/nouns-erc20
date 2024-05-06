@@ -74,4 +74,18 @@ contract TokenDeployerTest is Test {
             predictedTokenAddress: predictedAddress
         });
     }
+
+    function test_givenAmountPerNFTZero_reverts() public {
+        vm.expectRevert("NFTBackedToken: amountPerNFT is zero");
+        tokenDeployer.deployToken({
+            owner: makeAddr("owner"),
+            name: "Nouns",
+            symbol: "NOUNS",
+            decimals: 18,
+            erc721Token: makeAddr("erc721Token"),
+            amountPerNFT: 0,
+            admin: makeAddr("admin"),
+            nonce: 0
+        });
+    }
 }

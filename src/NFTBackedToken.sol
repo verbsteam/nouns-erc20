@@ -69,6 +69,8 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
         __ERC20_init(name_, symbol_);
         __ERC20Permit_init(name_);
 
+        require(amountPerNFT_ > 0, "NFTBackedToken: amountPerNFT is zero");
+
         NFTBackedTokenStorage storage $ = _getNFTBackedTokenStorage();
         $.decimals = decimals_;
         $.nft = IERC721(nft_);
