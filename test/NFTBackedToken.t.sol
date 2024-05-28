@@ -20,6 +20,7 @@ contract NFTBackedTokenTest is Test {
     event Swap(uint256[] tokensIn, uint256[] tokensOut, address indexed to);
     event UpgradesDisabled();
     event AdminPowerBurned();
+    event AdminSet(address indexed newAdmin);
 
     error OwnableUnauthorizedAccount(address account);
     error EnforcedPause();
@@ -294,6 +295,30 @@ contract NFTBackedTokenTest is Test {
 
         assertEq(token.allowance(owner, spender), 42 * 1e18);
         assertEq(token.nonces(owner), 1);
+    }
+
+    function test_setAdmin_worksForOwner() public {
+        vm.expectEmit(true, true, true, true);
+        emit AdminSet(makeAddr("new admin"));
+
+        vm.startPrank(TIMELOCK);
+        token.setAdmin(makeAddr("new admin"));
+        assertEq(token.admin(), makeAddr("new admin"));
+    }
+
+    function test_setAdmin_worksForAdmin() public {
+        vm.expectEmit(true, true, true, true);
+        emit AdminSet(makeAddr("new admin"));
+        
+        vm.startPrank(admin);
+        token.setAdmin(makeAddr("new admin"));
+        assertEq(token.admin(), makeAddr("new admin"));
+    }
+
+    function test_setAdmin_revertsForNonAdminNorOwner() public {
+        vm.startPrank(makeAddr("not admin nor owner"));
+        vm.expectRevert("must be admin or owner");
+        token.setAdmin(makeAddr("new admin"));
     }
 }
 
