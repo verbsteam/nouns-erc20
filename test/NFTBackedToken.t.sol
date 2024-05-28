@@ -66,7 +66,7 @@ contract NFTBackedTokenTest is Test {
         vm.expectEmit(true, true, true, true);
         emit Deposit(nounIds, NOUNDERS);
 
-        token.deposit(nounIds, NOUNDERS);
+        token.deposit(nounIds);
 
         assertEq(token.balanceOf(NOUNDERS), 2_000_000 * 1e18);
         assertEq(NOUNS_TOKEN.ownerOf(1050), address(token));
@@ -78,7 +78,7 @@ contract NFTBackedTokenTest is Test {
         token.pause();
 
         vm.expectRevert(EnforcedPause.selector);
-        token.deposit(nounIds, NOUNDERS);
+        token.deposit(nounIds);
     }
 
     function test_redeem() public {
@@ -86,16 +86,16 @@ contract NFTBackedTokenTest is Test {
         vm.startPrank(NOUNDERS);
         NOUNS_TOKEN.approve(address(token), 1050);
         NOUNS_TOKEN.approve(address(token), 1060);
-        token.deposit(nounIds, NOUNDERS);
+        token.deposit(nounIds);
 
         vm.expectEmit(true, true, true, true);
-        emit Redeem(nounIds, address(0x123));
+        emit Redeem(nounIds, NOUNDERS);
 
-        token.redeem(nounIds, address(0x123));
+        token.redeem(nounIds);
 
         assertEq(token.balanceOf(NOUNDERS), 0);
-        assertEq(NOUNS_TOKEN.ownerOf(1050), address(0x123));
-        assertEq(NOUNS_TOKEN.ownerOf(1060), address(0x123));
+        assertEq(NOUNS_TOKEN.ownerOf(1050), NOUNDERS);
+        assertEq(NOUNS_TOKEN.ownerOf(1060), NOUNDERS);
     }
 
     function test_redeem_givenInsufficientERC20s_reverts() public {
@@ -103,14 +103,14 @@ contract NFTBackedTokenTest is Test {
         vm.startPrank(NOUNDERS);
         NOUNS_TOKEN.approve(address(token), 1050);
         NOUNS_TOKEN.approve(address(token), 1060);
-        token.deposit(nounIds, NOUNDERS);
+        token.deposit(nounIds);
 
         token.transfer(makeAddr("some recipient"), 1);
 
         vm.expectRevert(
             abi.encodeWithSelector(ERC20InsufficientBalance.selector, NOUNDERS, 2_000_000 * 1e18 - 1, 2_000_000 * 1e18)
         );
-        token.redeem(nounIds, address(0x123));
+        token.redeem(nounIds);
     }
 
     function test_redeem_whenPaused_reverts() public {
@@ -118,32 +118,30 @@ contract NFTBackedTokenTest is Test {
         token.pause();
 
         vm.expectRevert(EnforcedPause.selector);
-        token.redeem(nounIds, address(0x123));
+        token.redeem(nounIds);
     }
 
     function test_swap() public {
-        address swapRecipient = makeAddr("swap recipient");
-
         vm.startPrank(NOUNDERS);
         NOUNS_TOKEN.approve(address(token), 1030);
         NOUNS_TOKEN.approve(address(token), 1040);
         NOUNS_TOKEN.approve(address(token), 1050);
         NOUNS_TOKEN.approve(address(token), 1060);
         nounIds = [1050, 1060];
-        token.deposit(nounIds, NOUNDERS);
+        token.deposit(nounIds);
         uint256[] memory tokensIn = new uint256[](2);
         tokensIn[0] = 1030;
         tokensIn[1] = 1040;
 
         vm.expectEmit(true, true, true, true);
-        emit Swap(tokensIn, nounIds, swapRecipient);
+        emit Swap(tokensIn, nounIds, NOUNDERS);
 
-        token.swap(tokensIn, nounIds, swapRecipient);
+        token.swap(tokensIn, nounIds);
 
         assertEq(NOUNS_TOKEN.ownerOf(1030), address(token));
         assertEq(NOUNS_TOKEN.ownerOf(1040), address(token));
-        assertEq(NOUNS_TOKEN.ownerOf(1050), swapRecipient);
-        assertEq(NOUNS_TOKEN.ownerOf(1060), swapRecipient);
+        assertEq(NOUNS_TOKEN.ownerOf(1050), NOUNDERS);
+        assertEq(NOUNS_TOKEN.ownerOf(1060), NOUNDERS);
     }
 
     function test_swap_whenPaused_reverts() public {
@@ -152,7 +150,7 @@ contract NFTBackedTokenTest is Test {
 
         uint256[] memory tokensIn = new uint256[](0);
         vm.expectRevert(EnforcedPause.selector);
-        token.swap(tokensIn, nounIds, NOUNDERS);
+        token.swap(tokensIn, nounIds);
     }
 
     function test_upgrade() public {
@@ -160,7 +158,7 @@ contract NFTBackedTokenTest is Test {
         vm.startPrank(NOUNDERS);
         NOUNS_TOKEN.approve(address(token), 1050);
         NOUNS_TOKEN.approve(address(token), 1060);
-        token.deposit(nounIds, NOUNDERS);
+        token.deposit(nounIds);
         vm.stopPrank();
 
         address newImpl = address(new NewContract());
@@ -200,7 +198,7 @@ contract NFTBackedTokenTest is Test {
         NOUNS_TOKEN.approve(address(token), 1050);
         NOUNS_TOKEN.approve(address(token), 1060);
         nounIds = [1030, 1040, 1050, 1060];
-        token.deposit(nounIds, NOUNDERS);
+        token.deposit(nounIds);
 
         token.transfer(holder, 2_000_000 * 1e18);
         assertEq(token.redeemableNFTsBalance(holder), 2);

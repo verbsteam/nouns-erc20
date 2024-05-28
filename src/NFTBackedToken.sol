@@ -78,29 +78,29 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
         $.admin = admin_;
     }
 
-    function deposit(uint256[] calldata tokenIds, address to) public whenNotPaused {
+    function deposit(uint256[] calldata tokenIds) public whenNotPaused {
         NFTBackedTokenStorage storage $ = _getNFTBackedTokenStorage();
 
         for (uint256 i; i < tokenIds.length; ++i) {
             $.nft.transferFrom(msg.sender, address(this), tokenIds[i]);
         }
-        _mint(to, $.amountPerNFT * tokenIds.length);
+        _mint(msg.sender, $.amountPerNFT * tokenIds.length);
 
-        emit Deposit(tokenIds, to);
+        emit Deposit(tokenIds, msg.sender);
     }
 
-    function redeem(uint256[] calldata tokenIds, address to) public whenNotPaused {
+    function redeem(uint256[] calldata tokenIds) public whenNotPaused {
         NFTBackedTokenStorage storage $ = _getNFTBackedTokenStorage();
 
         for (uint256 i; i < tokenIds.length; ++i) {
-            $.nft.transferFrom(address(this), to, tokenIds[i]);
+            $.nft.transferFrom(address(this), msg.sender, tokenIds[i]);
         }
         _burn(msg.sender, $.amountPerNFT * tokenIds.length);
 
-        emit Redeem(tokenIds, to);
+        emit Redeem(tokenIds, msg.sender);
     }
 
-    function swap(uint256[] calldata tokensIn, uint256[] calldata tokensOut, address to) public whenNotPaused {
+    function swap(uint256[] calldata tokensIn, uint256[] calldata tokensOut) public whenNotPaused {
         require(tokensIn.length == tokensOut.length, "NFTBackedToken: length mismatch");
         NFTBackedTokenStorage storage $ = _getNFTBackedTokenStorage();
 
@@ -109,10 +109,10 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
         }
 
         for (uint256 i; i < tokensOut.length; ++i) {
-            $.nft.transferFrom(address(this), to, tokensOut[i]);
+            $.nft.transferFrom(address(this), msg.sender, tokensOut[i]);
         }
 
-        emit Swap(tokensIn, tokensOut, to);
+        emit Swap(tokensIn, tokensOut, msg.sender);
     }
 
     /// @dev Returns the decimals places of the token.
