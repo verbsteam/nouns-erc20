@@ -18,6 +18,8 @@ contract NFTBackedTokenTest is Test {
     event Deposit(uint256[] tokenIds, address indexed to);
     event Redeem(uint256[] tokenIds, address indexed to);
     event Swap(uint256[] tokensIn, uint256[] tokensOut, address indexed to);
+    event UpgradesDisabled();
+    event AdminPowerBurned();
 
     error OwnableUnauthorizedAccount(address account);
     error EnforcedPause();
@@ -174,6 +176,9 @@ contract NFTBackedTokenTest is Test {
     }
 
     function test_upgradeToAndCall_givenDisabledUpgrades_reverts() public {
+        vm.expectEmit(true, true, true, true);
+        emit UpgradesDisabled();
+
         vm.prank(TIMELOCK);
         token.disableUpgrades();
 
@@ -211,12 +216,18 @@ contract NFTBackedTokenTest is Test {
     }
 
     function test_burnAdminPower_worksForAdmin() public {
+        vm.expectEmit(true, true, true, true);
+        emit AdminPowerBurned();
+
         vm.startPrank(admin);
         token.burnAdminPower();
         assertEq(token.admin(), address(0));
     }
 
     function test_burnAdminPower_worksForOwner() public {
+        vm.expectEmit(true, true, true, true);
+        emit AdminPowerBurned();
+        
         vm.startPrank(TIMELOCK);
         token.burnAdminPower();
         assertEq(token.admin(), address(0));

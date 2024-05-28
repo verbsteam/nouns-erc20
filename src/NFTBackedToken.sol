@@ -12,6 +12,8 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
     event Deposit(uint256[] tokenIds, address indexed to);
     event Redeem(uint256[] tokenIds, address indexed to);
     event Swap(uint256[] tokensIn, uint256[] tokensOut, address indexed to);
+    event UpgradesDisabled();
+    event AdminPowerBurned();
 
     /// @custom:storage-location erc7201:nouns.storage.NFTBackedToken
     struct NFTBackedTokenStorage {
@@ -162,11 +164,15 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
     function disableUpgrades() external onlyOwner {
         NFTBackedTokenStorage storage $ = _getNFTBackedTokenStorage();
         $.upgradesDisabled = true;
+
+        emit UpgradesDisabled();
     }
 
     function burnAdminPower() external onlyOwnerOrAdmin {
         NFTBackedTokenStorage storage $ = _getNFTBackedTokenStorage();
         $.admin = address(0);
+
+        emit AdminPowerBurned();
     }
 
     function pause() external onlyAdmin {
