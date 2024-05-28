@@ -70,6 +70,7 @@ contract NFTBackedToken is ERC20PermitUpgradeable, UUPSUpgradeable, OwnableUpgra
         __Ownable_init(owner_);
         __ERC20_init(name_, symbol_);
         __ERC20Permit_init(name_);
+        __Pausable_init();
 
         require(amountPerNFT_ > 0, "NFTBackedToken: amountPerNFT is zero");
 
