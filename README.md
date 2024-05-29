@@ -23,3 +23,7 @@ forge create TokenDeployer --verify --rpc-url $RPC_SEPOLIA -i
 # verify contracts if needed
 forge verify-contract ...
 ```
+
+| Chain   | Contract      | Address                                                                                                                       |
+| ------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Sepolia | TokenDeployer | [0x3Ee7C7eaa83aBDf28F0aFca4a19fEf4613825B3C](https://sepolia.etherscan.io/address/0x3Ee7C7eaa83aBDf28F0aFca4a19fEf4613825B3C) |
