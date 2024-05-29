@@ -27,3 +27,4 @@ forge verify-contract ...
 | Chain   | Contract      | Address                                                                                                                       |
 | ------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | Sepolia | TokenDeployer | [0x3Ee7C7eaa83aBDf28F0aFca4a19fEf4613825B3C](https://sepolia.etherscan.io/address/0x3Ee7C7eaa83aBDf28F0aFca4a19fEf4613825B3C) |
+| Mainnet | TokenDeployer | [0x12C90168d42EF56980f6479046754063d939eb6e](https://etherscan.io/address/0x12c90168d42ef56980f6479046754063d939eb6e)         |
