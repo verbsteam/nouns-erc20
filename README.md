@@ -1,66 +1,25 @@
-## Foundry
+## NFT backed ERC20 token
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+### Contracts
 
-Foundry consists of:
+#### NFTBackedToken.sol
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+An upgradeable ERC20 token which is backed by NFTs.
+Depositing NFTs into the contract mints ERC20 tokens.
+Redeeming the NFTs is possible by burning the ERC20 tokens.
 
-## Documentation
+A fixed conversion rate is configured when initializing the contract.
 
-https://book.getfoundry.sh/
+#### TokenDeployer.sol
 
-## Usage
+A factory for deploying NFTBackedTokens.
 
-### Build
+### Deployment
 
-```shell
-$ forge build
 ```
+forge build
+forge create TokenDeployer --verify --rpc-url $RPC_SEPOLIA -i
 
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
+# verify contracts if needed
+forge verify-contract ...
 ```

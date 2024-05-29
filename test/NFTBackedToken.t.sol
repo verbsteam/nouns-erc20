@@ -18,6 +18,9 @@ contract NFTBackedTokenTest is Test {
     event Deposit(uint256[] tokenIds, address indexed to);
     event Redeem(uint256[] tokenIds, address indexed to);
     event Swap(uint256[] tokensIn, uint256[] tokensOut, address indexed to);
+    event UpgradesDisabled();
+    event AdminPowerBurned();
+    event AdminSet(address indexed newAdmin);
 
     error OwnableUnauthorizedAccount(address account);
     error EnforcedPause();
@@ -66,7 +69,7 @@ contract NFTBackedTokenTest is Test {
         vm.expectEmit(true, true, true, true);
         emit Deposit(nounIds, NOUNDERS);
 
-        token.deposit(nounIds, NOUNDERS);
+        token.deposit(nounIds);
 
         assertEq(token.balanceOf(NOUNDERS), 2_000_000 * 1e18);
         assertEq(NOUNS_TOKEN.ownerOf(1050), address(token));
@@ -78,7 +81,7 @@ contract NFTBackedTokenTest is Test {
         token.pause();
 
         vm.expectRevert(EnforcedPause.selector);
-        token.deposit(nounIds, NOUNDERS);
+        token.deposit(nounIds);
     }
 
     function test_redeem() public {
@@ -86,16 +89,16 @@ contract NFTBackedTokenTest is Test {
         vm.startPrank(NOUNDERS);
         NOUNS_TOKEN.approve(address(token), 1050);
         NOUNS_TOKEN.approve(address(token), 1060);
-        token.deposit(nounIds, NOUNDERS);
+        token.deposit(nounIds);
 
         vm.expectEmit(true, true, true, true);
-        emit Redeem(nounIds, address(0x123));
+        emit Redeem(nounIds, NOUNDERS);
 
-        token.redeem(nounIds, address(0x123));
+        token.redeem(nounIds);
 
         assertEq(token.balanceOf(NOUNDERS), 0);
-        assertEq(NOUNS_TOKEN.ownerOf(1050), address(0x123));
-        assertEq(NOUNS_TOKEN.ownerOf(1060), address(0x123));
+        assertEq(NOUNS_TOKEN.ownerOf(1050), NOUNDERS);
+        assertEq(NOUNS_TOKEN.ownerOf(1060), NOUNDERS);
     }
 
     function test_redeem_givenInsufficientERC20s_reverts() public {
@@ -103,56 +106,56 @@ contract NFTBackedTokenTest is Test {
         vm.startPrank(NOUNDERS);
         NOUNS_TOKEN.approve(address(token), 1050);
         NOUNS_TOKEN.approve(address(token), 1060);
-        token.deposit(nounIds, NOUNDERS);
+        token.deposit(nounIds);
 
         token.transfer(makeAddr("some recipient"), 1);
 
         vm.expectRevert(
             abi.encodeWithSelector(ERC20InsufficientBalance.selector, NOUNDERS, 2_000_000 * 1e18 - 1, 2_000_000 * 1e18)
         );
-        token.redeem(nounIds, address(0x123));
+        token.redeem(nounIds);
     }
 
     function test_redeem_whenPaused_reverts() public {
-        changePrank(admin);
+        vm.stopPrank();
+        vm.startPrank(admin);
         token.pause();
 
         vm.expectRevert(EnforcedPause.selector);
-        token.redeem(nounIds, address(0x123));
+        token.redeem(nounIds);
     }
 
     function test_swap() public {
-        address swapRecipient = makeAddr("swap recipient");
-
         vm.startPrank(NOUNDERS);
         NOUNS_TOKEN.approve(address(token), 1030);
         NOUNS_TOKEN.approve(address(token), 1040);
         NOUNS_TOKEN.approve(address(token), 1050);
         NOUNS_TOKEN.approve(address(token), 1060);
         nounIds = [1050, 1060];
-        token.deposit(nounIds, NOUNDERS);
+        token.deposit(nounIds);
         uint256[] memory tokensIn = new uint256[](2);
         tokensIn[0] = 1030;
         tokensIn[1] = 1040;
 
         vm.expectEmit(true, true, true, true);
-        emit Swap(tokensIn, nounIds, swapRecipient);
+        emit Swap(tokensIn, nounIds, NOUNDERS);
 
-        token.swap(tokensIn, nounIds, swapRecipient);
+        token.swap(tokensIn, nounIds);
 
         assertEq(NOUNS_TOKEN.ownerOf(1030), address(token));
         assertEq(NOUNS_TOKEN.ownerOf(1040), address(token));
-        assertEq(NOUNS_TOKEN.ownerOf(1050), swapRecipient);
-        assertEq(NOUNS_TOKEN.ownerOf(1060), swapRecipient);
+        assertEq(NOUNS_TOKEN.ownerOf(1050), NOUNDERS);
+        assertEq(NOUNS_TOKEN.ownerOf(1060), NOUNDERS);
     }
 
     function test_swap_whenPaused_reverts() public {
-        changePrank(admin);
+        vm.stopPrank();
+        vm.startPrank(admin);
         token.pause();
 
         uint256[] memory tokensIn = new uint256[](0);
         vm.expectRevert(EnforcedPause.selector);
-        token.swap(tokensIn, nounIds, NOUNDERS);
+        token.swap(tokensIn, nounIds);
     }
 
     function test_upgrade() public {
@@ -160,7 +163,7 @@ contract NFTBackedTokenTest is Test {
         vm.startPrank(NOUNDERS);
         NOUNS_TOKEN.approve(address(token), 1050);
         NOUNS_TOKEN.approve(address(token), 1060);
-        token.deposit(nounIds, NOUNDERS);
+        token.deposit(nounIds);
         vm.stopPrank();
 
         address newImpl = address(new NewContract());
@@ -176,6 +179,9 @@ contract NFTBackedTokenTest is Test {
     }
 
     function test_upgradeToAndCall_givenDisabledUpgrades_reverts() public {
+        vm.expectEmit(true, true, true, true);
+        emit UpgradesDisabled();
+
         vm.prank(TIMELOCK);
         token.disableUpgrades();
 
@@ -200,7 +206,7 @@ contract NFTBackedTokenTest is Test {
         NOUNS_TOKEN.approve(address(token), 1050);
         NOUNS_TOKEN.approve(address(token), 1060);
         nounIds = [1030, 1040, 1050, 1060];
-        token.deposit(nounIds, NOUNDERS);
+        token.deposit(nounIds);
 
         token.transfer(holder, 2_000_000 * 1e18);
         assertEq(token.redeemableNFTsBalance(holder), 2);
@@ -213,12 +219,18 @@ contract NFTBackedTokenTest is Test {
     }
 
     function test_burnAdminPower_worksForAdmin() public {
+        vm.expectEmit(true, true, true, true);
+        emit AdminPowerBurned();
+
         vm.startPrank(admin);
         token.burnAdminPower();
         assertEq(token.admin(), address(0));
     }
 
     function test_burnAdminPower_worksForOwner() public {
+        vm.expectEmit(true, true, true, true);
+        emit AdminPowerBurned();
+
         vm.startPrank(TIMELOCK);
         token.burnAdminPower();
         assertEq(token.admin(), address(0));
@@ -256,7 +268,8 @@ contract NFTBackedTokenTest is Test {
         token.pause();
         assert(token.paused());
 
-        changePrank(TIMELOCK);
+        vm.stopPrank();
+        vm.startPrank(TIMELOCK);
         token.unpause();
         assert(!token.paused());
     }
@@ -285,6 +298,30 @@ contract NFTBackedTokenTest is Test {
 
         assertEq(token.allowance(owner, spender), 42 * 1e18);
         assertEq(token.nonces(owner), 1);
+    }
+
+    function test_setAdmin_worksForOwner() public {
+        vm.expectEmit(true, true, true, true);
+        emit AdminSet(makeAddr("new admin"));
+
+        vm.startPrank(TIMELOCK);
+        token.setAdmin(makeAddr("new admin"));
+        assertEq(token.admin(), makeAddr("new admin"));
+    }
+
+    function test_setAdmin_worksForAdmin() public {
+        vm.expectEmit(true, true, true, true);
+        emit AdminSet(makeAddr("new admin"));
+
+        vm.startPrank(admin);
+        token.setAdmin(makeAddr("new admin"));
+        assertEq(token.admin(), makeAddr("new admin"));
+    }
+
+    function test_setAdmin_revertsForNonAdminNorOwner() public {
+        vm.startPrank(makeAddr("not admin nor owner"));
+        vm.expectRevert("must be admin or owner");
+        token.setAdmin(makeAddr("new admin"));
     }
 }
 
