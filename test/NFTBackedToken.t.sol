@@ -117,7 +117,8 @@ contract NFTBackedTokenTest is Test {
     }
 
     function test_redeem_whenPaused_reverts() public {
-        changePrank(admin);
+        vm.stopPrank();
+        vm.startPrank(admin);
         token.pause();
 
         vm.expectRevert(EnforcedPause.selector);
@@ -148,7 +149,8 @@ contract NFTBackedTokenTest is Test {
     }
 
     function test_swap_whenPaused_reverts() public {
-        changePrank(admin);
+        vm.stopPrank();
+        vm.startPrank(admin);
         token.pause();
 
         uint256[] memory tokensIn = new uint256[](0);
@@ -228,7 +230,7 @@ contract NFTBackedTokenTest is Test {
     function test_burnAdminPower_worksForOwner() public {
         vm.expectEmit(true, true, true, true);
         emit AdminPowerBurned();
-        
+
         vm.startPrank(TIMELOCK);
         token.burnAdminPower();
         assertEq(token.admin(), address(0));
@@ -266,7 +268,8 @@ contract NFTBackedTokenTest is Test {
         token.pause();
         assert(token.paused());
 
-        changePrank(TIMELOCK);
+        vm.stopPrank();
+        vm.startPrank(TIMELOCK);
         token.unpause();
         assert(!token.paused());
     }
@@ -309,7 +312,7 @@ contract NFTBackedTokenTest is Test {
     function test_setAdmin_worksForAdmin() public {
         vm.expectEmit(true, true, true, true);
         emit AdminSet(makeAddr("new admin"));
-        
+
         vm.startPrank(admin);
         token.setAdmin(makeAddr("new admin"));
         assertEq(token.admin(), makeAddr("new admin"));
